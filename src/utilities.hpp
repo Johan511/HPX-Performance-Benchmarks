@@ -4,6 +4,7 @@
 
 namespace utilities {
 
+
 	class random_vector_generator {
 
 	private:
@@ -39,16 +40,13 @@ namespace utilities {
 
 	};
 
+
 	class csv_result_file {
-		//csv structure is hardcoded on purpose
-
+		//csv structure is hard-coded on purpose
 	private:
-
 		std::string filename;
 
-
 	public:
-
 		csv_result_file(std::string algorithm_name) : filename(algorithm_name + ".csv") {
 			//if file doesn't exist, create it
 			if (!std::filesystem::exists(filename)) {
@@ -70,6 +68,7 @@ namespace utilities {
 				<< hpx_par_time << "\n";
 			fout.close();
 		}
+
 	};
 
 }

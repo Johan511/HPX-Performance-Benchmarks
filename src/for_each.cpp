@@ -87,7 +87,6 @@ int main(int argc, char* argv[])
 
 
 
-
 	//Write results to file:
 
 	utilities::csv_result_file file("for_each");
