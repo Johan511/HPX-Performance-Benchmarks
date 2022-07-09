@@ -11,88 +11,88 @@
 
 int main(int argc, char* argv[])
 {
-    //handle command line arguements
-   
-    if (argc < 2) {
-        std::cout << "Command line arguements not set" << std::endl;
-        std::cout << "(vector size, iterations)" << std::endl;
-        return 1;
-    }
+	//handle command line arguements
 
-    int vector_size = std::stoi(argv[1]);
-    int iterations = std::stoi(argv[2]);
+	if (argc < 2) {
+		std::cout << "Command line arguements not set" << std::endl;
+		std::cout << "(vector size, iterations)" << std::endl;
+		return 1;
+	}
 
-
-    //initialize stuff
-
-    auto threads = hpx::get_os_thread_count();
-
-    utilities::timer timer;
-    utilities::random_vector_generator gen;
-       
-    double std_seq_time = 0;
-    double hpx_seq_time = 0;
-    double hpx_par_time = 0;
-
-auto lam = [](double num) {return num + ((int)num % 4); };
+	int vector_size = std::stoi(argv[1]);
+	int iterations = std::stoi(argv[2]);
 
 
-    //run sequential
+	//initialize stuff
 
-    for (int i = 0; i < iterations; i++) {
-        auto vec1 = gen.get_doubles(vector_size);
-        decltype(vec1) vec2(vec1.size());
+	auto threads = hpx::get_os_thread_count();
 
-        timer.start();
-        std::transform(vec1.begin(), vec1.end(), vec2.begin(), lam);
-        timer.stop();
-        //use result otherwise compiler will optimize it away:
-        if (hpx::count(vec2.begin(), vec2.end(), 42)) std::cout << "wow";
+	utilities::timer timer;
+	utilities::random_vector_generator gen;
 
-        std_seq_time += timer.get();
-    }
-    std_seq_time /= iterations;
+	double std_seq_time = 0;
+	double hpx_seq_time = 0;
+	double hpx_par_time = 0;
+
+	auto lam = [](double num) {return num + ((int)num % 4); };
 
 
-    //run hpx parallel
+	//run sequential
 
-    for (int i = 0; i < iterations; i++) {
-        auto vec1 = gen.get_doubles(vector_size);
-        decltype(vec1) vec2(vec1.size());
+	for (int i = 0; i < iterations; i++) {
+		auto vec1 = gen.get_doubles(vector_size);
+		decltype(vec1) vec2(vec1.size());
 
-        timer.start();
-        hpx::transform(hpx::execution::par, vec1.begin(), vec1.end(), vec2.begin(), lam);
-        timer.stop();
-        //use result otherwise compiler will optimize function call away:
-        if (hpx::count(vec2.begin(), vec2.end(), 42)) std::cout << "wow";
+		timer.start();
+		std::transform(vec1.begin(), vec1.end(), vec2.begin(), lam);
+		timer.stop();
+		//use result otherwise compiler will optimize it away:
+		if (hpx::count(vec2.begin(), vec2.end(), 42)) std::cout << "wow";
 
-        hpx_par_time += timer.get();
-    }
-    hpx_par_time /= iterations;
-
-
-    //run hpx sequential
-
-    for (int i = 0; i < iterations; i++) {
-        auto vec1 = gen.get_doubles(vector_size);
-        decltype(vec1) vec2(vec1.size());
-
-        timer.start();
-        hpx::transform(vec1.begin(), vec1.end(), vec2.begin(), lam);
-        timer.stop();
-        //use result otherwise compiler will optimize it away:
-        if (hpx::count(vec2.begin(), vec2.end(), 42)) std::cout << "wow";
-
-        hpx_seq_time += timer.get();
-    }
-    hpx_seq_time /= iterations;
+		std_seq_time += timer.get();
+	}
+	std_seq_time /= iterations;
 
 
+	//run hpx parallel
 
-    //Write results to file:
+	for (int i = 0; i < iterations; i++) {
+		auto vec1 = gen.get_doubles(vector_size);
+		decltype(vec1) vec2(vec1.size());
 
-    utilities::csv_result_file file("transform");
-    file.append(vector_size, threads, std_seq_time, hpx_seq_time, hpx_par_time);
+		timer.start();
+		hpx::transform(hpx::execution::par, vec1.begin(), vec1.end(), vec2.begin(), lam);
+		timer.stop();
+		//use result otherwise compiler will optimize function call away:
+		if (hpx::count(vec2.begin(), vec2.end(), 42)) std::cout << "wow";
 
-    return 0;
+		hpx_par_time += timer.get();
+	}
+	hpx_par_time /= iterations;
+
+
+	//run hpx sequential
+
+	for (int i = 0; i < iterations; i++) {
+		auto vec1 = gen.get_doubles(vector_size);
+		decltype(vec1) vec2(vec1.size());
+
+		timer.start();
+		hpx::transform(vec1.begin(), vec1.end(), vec2.begin(), lam);
+		timer.stop();
+		//use result otherwise compiler will optimize it away:
+		if (hpx::count(vec2.begin(), vec2.end(), 42)) std::cout << "wow";
+
+		hpx_seq_time += timer.get();
+	}
+	hpx_seq_time /= iterations;
+
+
+
+	//Write results to file:
+
+	utilities::csv_result_file file("transform");
+	file.append(vector_size, threads, std_seq_time, hpx_seq_time, hpx_par_time);
+
+	return 0;
 }
