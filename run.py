@@ -5,20 +5,23 @@ import subprocess
 from progress.bar import Bar
 
 
-def run_weak_scaling(executable_path: Path, n_max, runs=10):
+def run_weak_scaling(executable_path: Path, max_n):
     # delete conflicting csv file if it exists
     if os.path.exists(executable_path.with_suffix(".csv")):
         os.remove(executable_path.with_suffix(".csv"))
 
     cpu_count = os.cpu_count()
     print("Starting weak scaling test (" + executable_path.name + "):")
-    print("n_max = ", n)
+    print("n_max = ", max_n)
     progress_bar = Bar('Processing', max=cpu_count)
 
     for cores in range(1, cpu_count+1):
+        n = max_n*cores/cpu_count
+        iterations = int(max(1, 10**6/n))
+        # iterations = max_runs*cpu_count/cores
         subprocess.run([
-            executable_path, str(
-                n_max*cores/cpu_count), str(runs), "--hpx:threads="+str(cores)
+            executable_path, str(n), str(
+                iterations), "--hpx:threads="+str(cores)
         ])
         progress_bar.next()
     progress_bar.finish()
@@ -33,7 +36,7 @@ def run_weak_scaling(executable_path: Path, n_max, runs=10):
     shutil.move(csv_file_name, save_path + save_name)
 
 
-def run_strong_scaling(executable_path: Path, n, runs=10):
+def run_strong_scaling(executable_path: Path, n):
     # delete conflicting csv file if it exists
     if os.path.exists(executable_path.with_suffix(".csv")):
         os.remove(executable_path.with_suffix(".csv"))
@@ -43,9 +46,11 @@ def run_strong_scaling(executable_path: Path, n, runs=10):
     print("n = ", n)
     progress_bar = Bar('Processing', max=cpu_count)
 
+    iterations = max(1, 10**5/n)
     for cores in range(1, cpu_count+1):
         subprocess.run([
-            executable_path, str(n), str(runs), "--hpx:threads="+str(cores)
+            executable_path, str(n), str(
+                iterations), "--hpx:threads="+str(cores)
         ])
         progress_bar.next()
     progress_bar.finish()
@@ -75,6 +80,6 @@ for executable in executables:
 
     csv_path = executable.with_suffix(".csv").name
     print("csv_path: ", csv_path)
-    for n in [10**2, 10**3, 10**4, 10**5, 10**6]:
-        iters = max(1, 10**4/n)
-        run_strong_scaling(executable, n, iters)
+    for n in [10**3, 10**4, 10**5, 10**6, 10**7, 10**8]:
+        run_weak_scaling(executable, n)
+        run_strong_scaling(executable, n)

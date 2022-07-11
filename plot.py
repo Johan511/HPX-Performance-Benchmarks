@@ -8,19 +8,22 @@ def plot_weak_scaling(csv_path: Path):
 
     plot_title = csv_path.stem
 
-    eff_data = (
-        data[["hpx_seq_time", "hpx_par_time"]].apply(lambda x: 1/x))
-    print(eff_data)
+    max_cores = data["threads"].max()
 
-    eff_data["hpx_seq_time"] *= data["hpx_seq_time"][0]
-    eff_data["hpx_par_time"] *= data["hpx_par_time"][0]
+    eff_data = data[["hpx_seq_time", "hpx_par_time"]]
+    eff_data /= eff_data.iloc[0]  # normalize to time of single core
+    # inverse because we want T1core/Tncores
+    eff_data = eff_data.apply(lambda x: 1/x)
+
     eff_data["threads"] = data["threads"]
-
-    print(eff_data)
 
     fig, ax = plt.subplots()
     # ax.hlines(data["hpx_par_time"][0], data["threads"])
-    eff_data.plot(x="threads", title=plot_title)
+    eff_data.plot(x="threads", title=plot_title, ax=ax)
+    ax.hlines(y=1, xmin=1, xmax=max_cores, linestyle='dashed', label="ideal efficiency")
+    ax.set_ylabel("Efficiency")
+    ax.set_xlabel("Cores")
+    ax.legend()
 
     img_path = csv_path.parent / Path("./plots/")
     img_path.mkdir(parents=True, exist_ok=True)
@@ -82,9 +85,17 @@ def plot_strong_scaling(csv_path: Path):
     plt.show()
 
 
-folder = Path("./results/weak_scaling/")
+folder_strong_scaling = Path("./results/strong_scaling/")
 
-for subfolder in folder.iterdir():
+for subfolder in folder_strong_scaling.iterdir():
+    for file in subfolder.iterdir():
+        if (file.suffix == ".csv"):
+            print("Plotting CSV File: ", file)
+            # plot_threads_vs_time(file)
+            # plot_strong_scaling(file)
+
+folder_weak_scaling = Path("./results/weak_scaling/")
+for subfolder in folder_weak_scaling.iterdir():
     for file in subfolder.iterdir():
         if (file.suffix == ".csv"):
             print("Plotting CSV File: ", file)
