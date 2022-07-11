@@ -1,3 +1,4 @@
+import math
 import os
 from pathlib import Path
 import shutil
@@ -30,7 +31,8 @@ def run_weak_scaling(executable_path: Path, max_n):
     executable_name = executable_path.with_suffix("").name
     csv_file_name = executable_path.with_suffix(".csv").name
     save_path = "./results/weak_scaling/" + executable_name + "/"
-    save_name = executable_name + " (n_max=" + str(n) + ").csv"
+    save_name = executable_name + \
+        " (n_max=10^" + str(int(math.log10(n))) + ").csv"
 
     Path(save_path).mkdir(parents=True, exist_ok=True)
     shutil.move(csv_file_name, save_path + save_name)
@@ -59,7 +61,7 @@ def run_strong_scaling(executable_path: Path, n):
     executable_name = executable_path.with_suffix("").name
     csv_file_name = executable_path.with_suffix(".csv").name
     save_path = "./results/strong_scaling/" + executable_name + "/"
-    save_name = executable_name + " (n=" + str(n) + ").csv"
+    save_name = executable_name + " (n=10^" + str(int(math.log10(n))) + ").csv"
 
     Path(save_path).mkdir(parents=True, exist_ok=True)
     shutil.move(csv_file_name, save_path + save_name)
