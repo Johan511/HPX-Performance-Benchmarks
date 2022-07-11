@@ -26,7 +26,8 @@ def run_strong_scaling(executable_path: Path, n, runs=10):
     executable_name = executable_path.with_suffix("").name
     csv_file_name = executable_path.with_suffix(".csv").name
     save_path = "./results/strong_scaling/" + executable_name + "/"
-    save_name = executable_name + "_n=" + str(n) + ".csv"
+    save_name = executable_name + " n=" + str(n) + ".csv"
+
     Path(save_path).mkdir(parents=True, exist_ok=True)
     shutil.move(csv_file_name, save_path + save_name)
 
@@ -36,7 +37,14 @@ folder = Path("install/bin/")
 print("Found executables: ", [
     item.with_suffix("").name for item in folder.iterdir()])
 
-for executable in folder.iterdir():
+executables = [file for file in folder.iterdir() if file.suffix != ".dll"]
+
+# print(executables)
+for executable in executables:
+
+    if os.access(executable, os.X_OK):
+        print(executable, " is executable")
+
     csv_path = executable.with_suffix(".csv").name
     print("csv_path: ", csv_path)
     for n in [10**2, 10**3, 10**4, 10**5, 10**6]:
