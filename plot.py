@@ -3,7 +3,33 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 
-def plot_strong_scaling_time(csv_path: Path):
+def plot_weak_scaling(csv_path: Path):
+    data = pd.read_csv(csv_path)
+
+    plot_title = csv_path.stem
+
+    eff_data = (
+        data[["hpx_seq_time", "hpx_par_time"]].apply(lambda x: 1/x))
+    print(eff_data)
+
+    eff_data["hpx_seq_time"] *= data["hpx_seq_time"][0]
+    eff_data["hpx_par_time"] *= data["hpx_par_time"][0]
+    eff_data["threads"] = data["threads"]
+
+    print(eff_data)
+
+    fig, ax = plt.subplots()
+    # ax.hlines(data["hpx_par_time"][0], data["threads"])
+    eff_data.plot(x="threads", title=plot_title)
+
+    img_path = csv_path.parent / Path("./plots/")
+    img_path.mkdir(parents=True, exist_ok=True)
+
+    plt.savefig(img_path / Path(csv_path.stem + ".png"))
+    plt.show()
+
+
+def plot_threads_vs_time(csv_path: Path):
     data = pd.read_csv(csv_path)
     data["std_seq_time"] *= 10**(-6)
     data["hpx_seq_time"] *= 10**(-6)
@@ -39,7 +65,6 @@ def plot_strong_scaling(csv_path: Path):
         (data[["std_seq_time", "hpx_seq_time", "hpx_par_time"]]).apply(
             lambda x: 1/x)
 
-
     speedup_data["threads"] = data["threads"]
 
     fig, ax = plt.subplots()
@@ -50,7 +75,6 @@ def plot_strong_scaling(csv_path: Path):
             linestyle='dashed', label="ideal speedup")
     ax.legend()
 
-
     img_path = csv_path.parent / Path("./plots/")
     img_path.mkdir(parents=True, exist_ok=True)
 
@@ -58,11 +82,11 @@ def plot_strong_scaling(csv_path: Path):
     plt.show()
 
 
-folder = Path("./results/strong_scaling/")
+folder = Path("./results/weak_scaling/")
 
 for subfolder in folder.iterdir():
     for file in subfolder.iterdir():
         if (file.suffix == ".csv"):
             print("Plotting CSV File: ", file)
-            plot_strong_scaling_time(file)
-            plot_strong_scaling(file)
+            plot_threads_vs_time(file)
+            plot_weak_scaling(file)
