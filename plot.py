@@ -3,6 +3,31 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 
+def plot_speedup_test(csv_path: Path):
+    data = pd.read_csv(csv_path)
+
+    plot_title = "Speedup Test\n" + csv_path.stem
+
+    speedup_data = pd.DataFrame()
+    speedup_data["hpx_par"] = data["hpx_seq_time"]/data["hpx_par_time"]
+    speedup_data["hpx_seq"] = data["hpx_seq_time"]/data["hpx_seq_time"]
+    speedup_data["vector_size"] = data["vector_size"]
+
+    fig, ax = plt.subplots()
+    speedup_data.plot(x="vector_size", title=plot_title, ax=ax)
+    ax.set_xlabel("Vector size")
+    ax.set_ylabel("Speedup (relative to seq)")
+    ax.set_xscale("log")
+
+    ax.legend()
+
+    img_path = csv_path.parent / Path("./plots/")
+    img_path.mkdir(parents=True, exist_ok=True)
+
+    plt.savefig(img_path / Path(csv_path.stem + ".png"))
+    plt.show()
+
+
 def plot_weak_scaling(csv_path: Path):
     data = pd.read_csv(csv_path)
 
@@ -92,10 +117,21 @@ for subfolder in folder_strong_scaling.iterdir():
             plot_threads_vs_time(file)
             plot_strong_scaling(file)
 
+
 folder_weak_scaling = Path("./results/weak_scaling/")
+
 for subfolder in folder_weak_scaling.iterdir():
     for file in subfolder.iterdir():
         if (file.suffix == ".csv"):
             print("Plotting CSV File: ", file)
             plot_threads_vs_time(file)
             plot_weak_scaling(file)
+
+
+folder_speedup_test = Path("./results/speedup_test/")
+
+for subfolder in folder_speedup_test.iterdir():
+    for file in subfolder.iterdir():
+        if (file.suffix == ".csv"):
+            print("Plotting CSV File: ", file)
+            plot_speedup_test(file)

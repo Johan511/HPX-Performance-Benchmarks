@@ -5,8 +5,8 @@
       "name": "base",
       "hidden": true,
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build",
-      "installDir": "${sourceDir}/install"
+      "binaryDir": "${sourceDir}/build/",
+      "installDir": "${sourceDir}/install/"
     },
     {
       "name": "linux-base",
@@ -18,15 +18,19 @@
         "rhs": "Linux"
       }
     },
-
     {
       "name": "linux-RelWithDebInfo",
       "displayName": "Linux RelWithDebInfo",
       "inherits": "linux-base",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo" },
-      "vendor": { "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": { "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}" } }
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
+          "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}"
+        }
+      }
     },
-
     {
       "name": "linux-Release",
       "displayName": "Linux Release",
@@ -35,9 +39,12 @@
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_CXX_FLAGS": "-O3"
       },
-      "vendor": { "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": { "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}" } }
+      "vendor": {
+        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
+          "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}"
+        }
+      }
     },
-
     {
       "name": "windows-base",
       "inherits": "base",
@@ -53,7 +60,6 @@
         "rhs": "Windows"
       }
     },
-
     {
       "name": "x64-debug",
       "displayName": "x64 Debug",
@@ -64,10 +70,9 @@
       },
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-         "HPX_DIR": "C:\\src\\hpx-1.8.0-debug"
+        "HPX_DIR": "C:\\src\\hpx-1.8.0-debug"
       }
     },
-
     {
       "name": "x64-release",
       "displayName": "x64 Release",
