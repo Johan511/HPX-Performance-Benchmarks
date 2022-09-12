@@ -2,14 +2,29 @@
   "version": 3,
   "configurePresets": [
     {
+      "name": "rostam-base",
+      "hidden": true,
+      "generator": "Ninja",
+      "cacheVariables": {
+        "AMPLIFIER_ROOT": "/opt/intel/oneapi/vtune/latest/"
+      }
+    },
+    {
+      "name": "rostam",
+      "binaryDir": "${sourceDir}/build/",
+      "installDir": "${sourceDir}/install/",
+      "inherits": "rostam-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
       "name": "windows-base",
-      "description": "Target Windows with the Visual Studio development environment.",
       "hidden": true,
       "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_C_COMPILER": "cl.exe",
         "CMAKE_CXX_COMPILER": "cl.exe",
-        "HPX_DIR": "C:/dev/HPX/install",
         "BOOST_ROOT": "C:/dev/libraries/boost_1_79_0/",
         "AMPLIFIER_ROOT": "C:/Program Files (x86)/Intel/oneAPI/vtune/latest/"
       },
@@ -25,7 +40,6 @@
     },
     {
       "name": "x64-debug",
-      "displayName": "x64 Debug",
       "binaryDir": "${sourceDir}/build_debug/",
       "installDir": "${sourceDir}/install_debug/",
       "inherits": "windows-base",
@@ -36,7 +50,6 @@
     },
     {
       "name": "x64-release",
-      "displayName": "x64 Release",
       "binaryDir": "${sourceDir}/build/",
       "installDir": "${sourceDir}/install/",
       "inherits": "windows-base",
