@@ -1,43 +1,32 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
-#include <hpx/hpx.hpp>
-#include "../utilities.hpp"
-#include "ittnotify.h"
+#include "hpx/hpx.hpp"
+#include "hpx/hpx_main.hpp"
+#include <hpx/include/parallel_executor_parameters.hpp>
 
-// ATTENTION: copy_if function (compatible with std::copy_if)
-// needs to be defined before including this file
+// define a callable "copy_if" object
 
-// define a "double test(int vector_size)" function that returns
-// execution time of "copy_if"
-__itt_domain *pD = __itt_domain_create("My Domain");
-
-utilities::timer timer;
-utilities::random_vector_generator gen;
-
-auto pred = [](double num)
-{ return ((int)std::pow(num, 1.2) % 8) < 4; };
-
-double test(int vector_size, std::size_t chunk_size)
+struct copy_if_t
 {
-	auto vec1 = gen.get_doubles(vector_size);
-	decltype(vec1) vec2(vec1.size());
+	int chunk_size = 0;
 
-	hpx::execution::static_chunk_size scs(chunk_size);
-
-	__itt_frame_begin_v3(pD, NULL);
-	timer.start();
-	hpx::copy_if(hpx::execution::par.with(scs), vec1.begin(), vec1.end(), vec2.begin(), pred);
-	timer.stop();
-	__itt_frame_end_v3(pD, NULL);
-
-	// use result otherwise compiler will optimize it away:
-	if (hpx::annotated_function(hpx::count, "count")(vec2.begin(), vec2.end(), 42.0))
+	void handle_args(std::vector<std::string> args)
 	{
-		std::cerr << "err42";
+		if (args.size() > 1)
+		{
+			chunk_size = std::stoi(args[1]);
+		}
 	}
 
-	return timer.get();
-}
+	template <typename... Args>
+	auto operator()(Args &&...args)
+	{
+		// ideally construction of the executor should be somehow
+		// moved to handle_args, so that it isn't timed by the timer
+		hpx::execution::static_chunk_size scs(chunk_size);
+		return hpx::copy_if(hpx::execution::par.with(scs), args...);
+	}
+} copy_if{};
 
-#include "../main.hpp"
+#include "copy_if.hpp"

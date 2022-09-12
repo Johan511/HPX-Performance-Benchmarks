@@ -11,8 +11,10 @@ import subprocess
 
 def benchmark_folder(exec_folder_path: Path):
     for executable in exec_folder_path.iterdir():
-        if "hpx_par_default" == executable.stem:
-            benchmark_chunks(executable)
+        # __runs only hpx_par__
+        if "hpx_par" == executable.stem:
+            continue
+        benchmark_chunks(executable)
 
 
 def benchmark_chunks(executable_path: Path):
@@ -21,28 +23,27 @@ def benchmark_chunks(executable_path: Path):
 
     # We create a list of logarithmically-spaced numbers. Those will
     # be the vector sizes for which the algorithm will be benchmarked.
-    n_datapoints = 100
-    n_min, n_max = [10**4, 10**8]
+    n_datapoints = 20
+    n_min, n_max = [10**4, 10**7]
 
     n_list = [int(n) for n in np.logspace(
         math.log10(n_min), math.log10(n_max), n_datapoints)]
 
     cores = multiprocessing.cpu_count()
-    # chunks_list = [20, 40, 80, 160, 320, 640, 1280]
-    chunks_list = [160]
+    chunks_list = [80, 160, 320]
+    # chunks_list = [160]
     # chunks_list = [pd.NA]
 
     for n in pb.progressbar(n_list):
         results = list()
         for chunks in chunks_list:
-            iterations = 50  # int(max(5, min(10**10/n, 10**4)))
+            iterations = 20  # int(max(5, min(10**10/n, 10**4)))
             chunk_size = math.ceil(n / chunks)
             # chunk_size = pd.NA
-            command = [executable_path, str(n),
-                       str(iterations), str(chunk_size),
+            command = [executable_path, str(iterations),
+                       str(n), str(chunk_size),
                        # "--hpx:threads=4"
                        ]
-            # print(command)
 
             # Run the algorithm. It will return a collection of floats, each float
             # representing elapsed time(ns) for each algorithm invocation.
@@ -63,7 +64,6 @@ def benchmark_chunks(executable_path: Path):
 
 
 def result_to_csv(alg_name: str, results: list[list[str, int, int, float]]):
-    # index = pd.MultiIndex.from_tuples()
     df = pd.DataFrame(results, columns=[
                       "alg_name", "n", "chunk_size", "time", "chunks"])
     # print(df)
@@ -75,7 +75,8 @@ def result_to_csv(alg_name: str, results: list[list[str, int, int, float]]):
 
 def vtune_run_folder(exec_folder_path: Path, vtune_test_type: str, chunks: int):
     for executable in exec_folder_path.iterdir():
-        if "hpx_par_default" not in executable.stem:
+        # __select hpx_par executable:__
+        if "hpx_par" not in executable.stem:
             continue
         vtune_run_exec(executable, vtune_test_type, chunks)
 
@@ -122,13 +123,16 @@ def vtune_run_exec(executable_path: Path, vtune_test_type: str, chunks: int):
     print("Run finished\n")
 
 
-folder = Path("executables/")
+folder = Path("install/")
 
 print("Found algorithms: ", [
     item.with_suffix("").name for item in folder.iterdir()])
 
 for subfolder in folder.iterdir():
+
+    # select specific folder:
     if subfolder.stem != "copy_if":
         continue
-    vtune_run_folder(subfolder, "threading", 40)
-    # benchmark_folder(subfolder)
+
+    # vtune_run_folder(subfolder, "threading", 40)
+    benchmark_folder(subfolder)
