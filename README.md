@@ -1,6 +1,7 @@
-# HPX-Performance-Benchmarks
+# HPX Performance Benchmarks
 
-Performance benchmarks for HPX implementation of C++ parallel algorithms
+Performance benchmarks for HPX implementation of C++ parallel algorithms.
+Made as part of [my 2022 GSoC project](https://pansysk75.github.io/blog/summer-of-code-2022/)
 
 ## Requirements:
 
