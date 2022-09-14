@@ -15,7 +15,9 @@ utilities::timer timer;
 utilities::random_vector_generator gen;
 
 auto pred = [](double num)
-{ return ((int)num % 4) < 2; };
+{
+	return num < 0.00001; // aint gonna happen
+};
 
 double test(std::vector<std::string> args)
 {

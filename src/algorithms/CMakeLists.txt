@@ -14,9 +14,14 @@ function(add_exe target)
 endfunction()
 
 
- set(subdirs 
+ set(subdirs
+    "copy"
     "copy_if"
     "copy_if-heavy"
+    "copy_if-nocopies"
+    "copy_if-allcopies"
+
+
 )
 
 foreach(subdir ${subdirs})

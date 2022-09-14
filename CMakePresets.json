@@ -6,7 +6,8 @@
       "hidden": true,
       "generator": "Ninja",
       "cacheVariables": {
-        "AMPLIFIER_ROOT": "/opt/intel/oneapi/vtune/latest/"
+        "AMPLIFIER_ROOT": "/opt/intel/oneapi/vtune/latest/",
+        "CMAKE_CXX_FLAGS": "-ltbb" //link tbb on GCC, needed for parallel stl
       }
     },
     {
