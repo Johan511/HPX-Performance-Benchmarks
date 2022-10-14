@@ -10,12 +10,13 @@ namespace utilities {
 
 	private:
 		std::mt19937 mersenne_engine{ 42 };
-		std::uniform_real_distribution<double> dist_double{ 1, 1024 };
 
 	public:
-		std::vector<double> get_doubles(size_t size) {
+		std::vector<double> get_doubles(size_t size, double _min=1.0, double _max=1024.0) {
 
-			auto gen = [this]()
+			std::uniform_real_distribution<double> dist_double{ _min, _max };
+
+			auto gen = [this, &dist_double]()
 			{
 				return dist_double(mersenne_engine);
 			};
@@ -23,6 +24,20 @@ namespace utilities {
 			std::vector<double> vec(size);
 			std::generate(vec.begin(), vec.end(), gen);
 			return vec;
+		}
+
+		std::vector<int> get_ints(size_t size, int _min=0, int _max=1024){
+			std::uniform_int_distribution<int> dist_int{_min, _max};
+
+			auto gen = [this, &dist_int]()
+			{
+				return dist_int(mersenne_engine);
+			};
+
+			std::vector<int> vec(size);
+			std::generate(vec.begin(), vec.end(), gen);
+			return vec;
+
 		}
 
 	};

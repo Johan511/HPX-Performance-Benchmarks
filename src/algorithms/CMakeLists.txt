@@ -18,10 +18,13 @@ endfunction()
     "copy"
     "copy_if"
     "copy_if-heavy"
+    "copy_if-heavier"
     "copy_if-nocopies"
     "copy_if-allcopies"
-
-
+    "copy_if-ntc"
+    "transform"
+    "remove"
+    "unique"
 )
 
 foreach(subdir ${subdirs})

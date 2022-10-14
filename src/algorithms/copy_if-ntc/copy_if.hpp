@@ -14,16 +14,25 @@ __itt_domain *pD = __itt_domain_create("My Domain");
 utilities::timer timer;
 utilities::random_vector_generator gen;
 
-auto pred = [](double num)
+auto pred = [](const std::vector<double> elem)
+{ return (((int)(elem[0])) % 4) < 2; };
+
+std::vector<std::vector<double>> gen_data(int n)
 {
-	return num < 1.00001; // aint gonna happen
-};
+	std::vector<std::vector<double>> data;
+	for (int i = 0; i < n; i++)
+	{
+		std::vector<double> vec = gen.get_doubles(10);
+		data.push_back(vec);
+	}
+	return data;
+}
 
 double test(std::vector<std::string> args)
 {
 	int vector_size = std::stoi(args[0]);
 	// hpx::scoped_annotation annotate("test");
-	auto vec1 = gen.get_doubles(vector_size);
+	std::vector<std::vector<double>> vec1 = gen_data(vector_size);
 	decltype(vec1) vec2(vec1.size());
 
 	copy_if.handle_args(args);
@@ -35,7 +44,7 @@ double test(std::vector<std::string> args)
 	__itt_frame_end_v3(pD, NULL);
 
 	// use result otherwise compiler will optimize it away:
-	if (hpx::annotated_function(hpx::count, "count")(vec2.begin(), vec2.end(), 42.0))
+	if (hpx::annotated_function(hpx::count, "count")(vec2.begin(), vec2.end(), std::vector<double>(10, 42)))
 	{
 		std::cerr << "err42";
 	}

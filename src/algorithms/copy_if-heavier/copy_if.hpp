@@ -1,5 +1,3 @@
-#include <string>
-#include <algorithm>
 #include "../utilities.hpp"
 #include <hpx/hpx.hpp>
 #include "ittnotify.h"
@@ -7,7 +5,7 @@
 // ATTENTION: copy_if function (compatible with std::copy_if)
 // needs to be defined before including this file
 
-// define a "double test(std::vector<std::string> args)" function that returns
+// define a "double test(int vector_size)" function that returns
 // execution time of "copy_if"
 __itt_domain *pD = __itt_domain_create("My Domain");
 
@@ -16,7 +14,12 @@ utilities::random_vector_generator gen;
 
 auto pred = [](double num)
 {
-	return num < 1.00001; // aint gonna happen
+	double calculation = num;
+	for (int i = 0; i < 8; i++)
+	{
+		calculation = std::pow(calculation, 1.2);
+	}
+	return ((int)calculation % 8) < 4;
 };
 
 double test(std::vector<std::string> args)

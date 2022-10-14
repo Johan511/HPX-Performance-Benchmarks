@@ -1,4 +1,3 @@
-import math
 import pandas as pd
 import seaborn as sns
 from pathlib import Path
@@ -11,95 +10,104 @@ def plot_scatter(csv_path: Path):
     raw_data = pd.read_csv(csv_path)
 
     # select range of data
-    raw_data.drop(raw_data[(raw_data["n"] <= 10**4)
-                  | (raw_data["n"] >= 10**9)].index, inplace=True)
-
-    # keep results only from copy_if algorithm
-    raw_data = raw_data[raw_data["alg_name"].str.contains(
-        "install/copy_if/")]
-
-    # remove prefix naming
-    raw_data["alg_name"] = raw_data["alg_name"].str.removeprefix(
-        "install/copy_if/")
-
-    # select implementation to be plotted
-    to_keep = [
-        "hpx_par",
-        # "hpx_par_scs",
-        # "std_par"
-        "std_seq"]
-
-    raw_data.drop(
-        raw_data[~raw_data["alg_name"].isin(to_keep)].index, inplace=True)
+    raw_data.drop(raw_data[(raw_data["n"] < 10**2)
+                  | (raw_data["n"] > 10**7)].index, inplace=True)
 
     print(raw_data)
 
-    copy_if_data = raw_data
+    # select what to keep
+    raw_data = raw_data[raw_data["alg_name"].str.contains(
+        "copy_if/")]
 
-    for alg_name, data in [("copy_if", copy_if_data)]:
+    raw_data = raw_data[raw_data["alg_name"].str.contains(
+        "hpx_par|my_hpx_par|std_seq")]
 
-        # make speedup column
-        seq_data = data[data["alg_name"].str.contains("std_seq")]
-        print(seq_data)
-        seq_mean = seq_data.groupby("n").mean()["time"].rename("seq_avg")
-        data = data.merge(seq_mean, on="n")
-        data["speedup"] = data["seq_avg"]/data["time"]
+    # remove prefix naming
+    raw_data["alg_name"] = raw_data["alg_name"].str.removeprefix(
+        "executables/")
 
-        print(data["speedup"])
+    print(raw_data)
 
-        # drop seq algorithm
-        data.drop(data[data["alg_name"].str.contains(
-            "std_seq")].index, inplace=True)
+    # # select implementation to be plotted
+    # to_keep = [
+    #     "copy_if/std_seq",
+    #     "copy_if/hpx_par",
+    #     # "copy_if/hpx_par_seqf3",
+    #     # "copy_if/hpx_par_seqf3",
+    # ]
 
-        print(data.groupby("chunks").mean())
-        # data["chunks"] = data["n"]/(data["chunk_size"])
+    # raw_data.drop(
+    #     raw_data[~raw_data["alg_name"].isin(to_keep)].index, inplace=True)
 
-        print(data["chunks"])
+    data = raw_data
 
-        # select chunk sizes to be plotted
-        data.drop(
-            data[~((data["alg_name"] == "hpx_par_scs")
-                   & (data["chunks"] == 80))
-                 & ~((data["alg_name"] == "hpx_par_scs")
-                     & (data["chunks"] == 160))
-                 & ~((data["alg_name"] == "hpx_par")
-                     & (data["chunks"] == 160))
-                 ].index, inplace=True)
+    # make speedup column
+    seq_data = data[data["alg_name"].str.contains("std_seq")]
+    print(seq_data)
 
-        fig, ax = plt.subplots(figsize=(10, 6))
+    seq_mean = seq_data.groupby("n").mean()["time"].rename("seq_avg")
+    print(seq_mean)
+    data = data.merge(seq_mean, on="n")
+    data["speedup"] = data["seq_avg"]/data["time"]
 
-        palette = sns.diverging_palette(
-            250, 30, l=65, center="dark", as_cmap=True)
+    # drop seq algorithm
+    # data.drop(data[data["alg_name"].str.contains(
+    #     "std_seq")].index, inplace=True)
 
-        sns.scatterplot(x="n", y="speedup", data=data,
-                        hue="alg_name",
-                        # hue="chunks",
-                        legend="full",
-                        # palette=palette,
-                        alpha=0.8,
-                        s=4,
-                        ax=ax)
+    # select chunk sizes to be plotted
+    data.drop(
+        data[~((data["alg_name"] == ("copy_if/my_hpx_par"))
+               & (data["chunks"] == 160))
+             & ~((data["alg_name"] == ("copy_if/hpx_par"))
+                 & (data["chunks"] == 160))
+             #  & ~((data["alg_name"] == ("remove/my_hpx_par_scs"))
+             #      & (data["chunks"] == 320))
+             #  & ~((data["alg_name"] == ("remove/hpx_par_scs"))
+             #      & (data["chunks"] == 320))
+             #  & ~((data["alg_name"].str.contains("/my_hpx_par_scs"))
+             #      & (data["chunks"] == 40))
+             #  & ~((data["alg_name"].str.contains("/std_seq")))
+             ].index, inplace=True)
 
-        sns.lineplot(x="n", y="speedup", data=data,
-                     hue="alg_name",
-                     # hue="chunks",
-                     legend=None,
-                     #  palette=palette,
-                     ci=None,
-                     ax=ax)
+    # data = data.sort_values(by=["alg_name", "n"], ascending=[False, False])
+    fig, ax = plt.subplots(figsize=(14, 8))
 
-        ax.set_ylabel("speedup (relative to sequential)")
+    # palette = sns.diverging_palette(
+    #     250, 30, l=65, center="dark", as_cmap=True)
 
-        ax.set_xscale("log")
-        ax.set_ylim(bottom=0)
-        # ax.set_ylim([0, 15])
+    sns.scatterplot(x="n", y="speedup", data=data,
+                    hue=data[["alg_name", "chunks"]].apply(tuple, axis=1),
+                    # hue="chunks",
+                    legend="full",
+                    # palette=palette,
+                    alpha=0.8,
+                    s=4,
+                    ax=ax)
 
-        ax.set_title(
-            "Speedup of parallel 'copy_if'")
+    sns.lineplot(x="n", y="speedup", data=data,
+                 hue=data[["alg_name", "chunks"]].apply(tuple, axis=1),
+                 #  legend=None,
+                 #  palette=palette,
+                 ci=None,
+                 ax=ax)
 
-        savepath = Path("plots/scatter/")
-        savepath.mkdir(parents=True, exist_ok=True)
-        plt.savefig(savepath.as_posix() + "/" + alg_name + ".png", dpi=140)
+    sns.lineplot(x=[data["n"].min(), data["n"].max()],
+                 y=[1, 1], ax=ax, color="black", linestyle="dashed")
+
+    ax.set_ylabel("speedup (relative to seq)")
+
+    # ax.set_yscale("log")
+    ax.set_xscale("log")
+    # ax.set_ylim(bottom=0)
+    ax.set_ylim([0, 6])
+
+    alg_name = "copy_if"
+    ax.set_title(
+        "Speedup of '" + alg_name + "'")
+
+    savepath = Path("plots/scatter/")
+    savepath.mkdir(parents=True, exist_ok=True)
+    plt.savefig(savepath.as_posix() + "/" + alg_name + ".png", dpi=140)
 
 
 plot_scatter(Path("results.csv"))
