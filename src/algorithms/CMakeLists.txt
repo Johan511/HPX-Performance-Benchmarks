@@ -1,12 +1,12 @@
-﻿set(vtune_dir "/opt/intel/oneapi/vtune/latest/sdk")
+﻿# set(vtune_dir "/opt/intel/oneapi/vtune/latest/sdk")
 
 function(add_exe target)
     get_filename_component(alg_name ${CMAKE_CURRENT_SOURCE_DIR} NAME)
     add_hpx_executable(
         ${alg_name}_${target} 
         SOURCES ${target}.cpp
-        HEADERS ../utilities.hpp ${vtune_dir}/include
-        DEPENDENCIES ${vtune_dir}/lib64/libittnotify.a
+        HEADERS ../utilities.hpp #${vtune_dir}/include
+        # DEPENDENCIES ${vtune_dir}/lib64/libittnotify.a
         INSTALL_SUFFIX ${alg_name}/
     )
     
@@ -15,16 +15,12 @@ endfunction()
 
 
  set(subdirs
-    "copy"
     "copy_if"
     "copy_if-heavy"
-    "copy_if-heavier"
-    "copy_if-nocopies"
-    "copy_if-allcopies"
-    "copy_if-ntc"
-    "transform"
     "remove"
     "unique"
+    "copy"
+    "transform"
 )
 
 foreach(subdir ${subdirs})

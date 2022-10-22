@@ -3,16 +3,18 @@
 #include <algorithm>
 #include <execution>
 
-//define a callable "transform" object
+// define a callable "transform" object
 
-struct transform_t {
+struct transform_t
+{
 
-	void handle_args(std::vector<std::string> args){}
+	void handle_args(std::vector<std::string> args) {}
 
-	template<typename... Args>
-	auto operator()(Args&&... args){
+	template <typename... Args>
+	auto operator()(Args &&...args)
+	{
 		return std::transform(args...);
 	}
-}transform{};
+};
 
 #include "transform.hpp"

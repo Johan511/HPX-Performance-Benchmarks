@@ -3,16 +3,18 @@
 #include <algorithm>
 #include <execution>
 
-//define a callable "copy_if" object
+// define a callable "copy_if" object
 
-struct copy_if_t {
+struct copy_if_t
+{
 
-	void handle_args(std::vector<std::string> args){}
+	void handle_args(std::vector<std::string> args) {}
 
-	template<typename... Args>
-	auto operator()(Args&&... args){
+	template <typename... Args>
+	auto operator()(Args &&...args)
+	{
 		return std::copy_if(args...);
 	}
-}copy_if{};
+};
 
 #include "copy_if.hpp"

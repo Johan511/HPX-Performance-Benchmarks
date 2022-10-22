@@ -5,7 +5,6 @@
 #include <hpx/hpx_main.hpp>
 #include <vector>
 #include <string>
-#include "ittnotify.h"
 
 std::vector<double> test_n(std::vector<std::string> cl_arguments)
 {

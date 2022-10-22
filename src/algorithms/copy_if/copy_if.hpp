@@ -19,6 +19,8 @@ auto pred = [](double num)
 
 double test(std::vector<std::string> args)
 {
+	copy_if_t copy_if;
+
 	int vector_size = std::stoi(args[0]);
 	// hpx::scoped_annotation annotate("test");
 	auto vec1 = gen.get_doubles(vector_size);

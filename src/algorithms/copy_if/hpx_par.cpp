@@ -16,6 +16,6 @@ struct copy_if_t
 	{
 		return hpx::copy_if(hpx::execution::par, args...);
 	}
-} copy_if{};
+};
 
 #include "copy_if.hpp"

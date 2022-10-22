@@ -5,12 +5,15 @@
 #include "hpx/hpx_main.hpp"
 #include <hpx/include/parallel_executor_parameters.hpp>
 
+// parallel copy_if using fork-join executor.
+
 // define a callable "copy_if" object
 
 struct copy_if_t
 {
 	int chunk_size = 0;
-	hpx::execution::static_chunk_size scs{};
+	hpx::execution::static_chunk_size scs;
+	hpx::execution::experimental::fork_join_executor exec;
 
 	void handle_args(std::vector<std::string> args)
 	{
@@ -24,7 +27,7 @@ struct copy_if_t
 	template <typename... Args>
 	auto operator()(Args &&...args)
 	{
-		return hpx::copy_if(hpx::execution::par.with(scs), args...);
+		return hpx::copy_if(hpx::execution::par.on(exec).with(scs), args...);
 	}
 };
 

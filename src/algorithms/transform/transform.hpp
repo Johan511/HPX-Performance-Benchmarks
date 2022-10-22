@@ -19,6 +19,8 @@ auto unary_op = [](double num)
 
 double test(std::vector<std::string> args)
 {
+	transform_t transform;
+
 	int vector_size = std::stoi(args[0]);
 	// hpx::scoped_annotation annotate("test");
 	auto vec1 = gen.get_doubles(vector_size);

@@ -16,6 +16,6 @@ struct transform_t
 	{
 		return hpx::transform(hpx::execution::par, args...);
 	}
-} transform{};
+};
 
 #include "transform.hpp"

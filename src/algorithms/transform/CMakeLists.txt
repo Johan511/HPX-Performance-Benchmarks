@@ -1,10 +1,10 @@
 ﻿
 set(executables
 std_seq
-std_par
-hpx_seq
 hpx_par
 hpx_par_scs
+hpx_par_sched-exec
+hpx_par_fork-join
 )
 
 foreach(executable ${executables})
