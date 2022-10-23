@@ -11,16 +11,15 @@ import subprocess
 
 def benchmark_folder(exec_folder_path: Path):
     for executable in exec_folder_path.iterdir():
-        # __runs only hpx_par__
-        if executable.stem not in ["hpx_par_scs", "hpx_par_fork-join", "hpx_par_sched-exec"]:
-            # if executable.stem not in ["std_seq"]:
-            continue
+        # if executable.stem not in ["hpx_par_scs", "hpx_par_fork-join", "hpx_par_sched-exec"]:
+        #     continue
         benchmark_chunks(executable)
 
 
 def benchmark_chunks(executable_path: Path):
-    alg_name = executable_path.as_posix()
-    print("\nStarting benchmark: (" + alg_name + "):")
+    alg_name = executable_path.as_posix().split("/")[1]
+    impl = executable_path.as_posix().split("/")[2]
+    print("\nStarting benchmark: (" + alg_name + ", " + impl + "):")
 
     # We create a list of logarithmically-spaced numbers. Those will
     # be the vector sizes for which the algorithm will be benchmarked.
@@ -31,16 +30,15 @@ def benchmark_chunks(executable_path: Path):
         math.log10(n_min), math.log10(n_max), n_datapoints)]
 
     cores = multiprocessing.cpu_count()
-    chunks_list = [1, 2, 4, 10, 20, 40, 80, 160, 320]
-    # chunks_list = [1]
-    # threads_list = [1, 2, 4, 8, 10, 20, 30, 40]
-    # threads_list = [0]
+    if "STD_SEQ" in alg_name:
+        chunks_list = [1]
+    else:
+        chunks_list = [1, 4, 10, 20, 40, 80, 160, 320, 640]
 
     for n in pb.progressbar(n_list):
         results = list()
-        # for n_threads in threads_list:
         for n_chunks in chunks_list:
-            iterations = 50  # int(max(5, min(10**10/n, 10**4)))
+            iterations = 50
             chunk_size = math.ceil(n / n_chunks)
             # chunk_size = 0
             command = [executable_path, str(iterations),
@@ -57,7 +55,7 @@ def benchmark_chunks(executable_path: Path):
                 print(ret)
 
             # convert output to list of tuples(alg_name, vector_size, time in ms)
-            datapoints = [[alg_name, n, chunk_size, float(dt)/(10**6), n_chunks]
+            datapoints = [[alg_name, impl, n, chunk_size, float(dt)/(10**6), n_chunks]
                           for dt in ret.stdout.splitlines()]
 
             # print("n = ", n, " :  ", datapoints, " ms")
@@ -66,67 +64,14 @@ def benchmark_chunks(executable_path: Path):
     print("Benchmark finished\n")
 
 
-def result_to_csv(alg_name: str, results: list[list[str, int, int, float]]):
+def result_to_csv(alg_name: str, results: list[list[str, str, int, int, float]]):
     df = pd.DataFrame(results, columns=[
-                      "alg_name", "n", "chunk_size", "time", "chunks"])
+                      "alg_name", "impl", "n", "chunk_size", "time", "chunks"])
     # print(df)
 
     filename = 'results.csv'
     df.to_csv(filename, mode='a', index=False,
               header=(not os.path.exists(filename)))
-
-
-def vtune_run_folder(exec_folder_path: Path, vtune_test_type: str, chunks: int):
-    for executable in exec_folder_path.iterdir():
-        # __select hpx_par executable:__
-        if executable.stem not in ["hpx_par_seqf3"]:
-
-            continue
-        vtune_run_exec(executable, vtune_test_type, chunks)
-
-
-def vtune_run_exec(executable_path: Path, vtune_test_type: str, chunks: int):
-    print("Starting test run (" + executable_path.as_posix() + "):")
-
-    alg_name = executable_path.parts[1]
-    alg_impl = executable_path.parts[2]
-
-    print(alg_name, alg_impl)
-
-    n_datapoints = 3
-    n_min, n_max = [10**5, 10**7]
-    n_list = [int(n) for n in np.logspace(
-        math.log10(n_min), math.log10(n_max), n_datapoints)]
-
-    for n in pb.progressbar(n_list):
-
-        iterations = 20  # int(max(5, min(10**7/n, 10**4)))
-        vtune_path = Path("/opt/intel/oneapi/vtune/latest/bin64/vtune")
-        vtune_results_path = "./vtune_results/" + vtune_test_type + "/" + \
-            alg_name + "/n=" + str(n) + "/" + alg_impl + "/"
-
-        vtune_args = ["-collect " + vtune_test_type,
-                      "-r " + vtune_results_path,
-                      # "-start-paused",
-                      #   "-knob sampling-and-waits=hw",
-                      #   "-knob sampling-interval=1",
-                      # "-knob stack-size=0",
-                      "-finalization-mode=full"]
-
-        # chunk_size = math.ceil(n/chunks)
-        chunk_size = 0
-
-        command = [vtune_path, *vtune_args, executable_path,
-                   str(iterations), str(n),
-                   str(chunk_size),
-                   "--hpx:ini=hpx.use_itt_notify!=1"]
-
-        val = subprocess.run(command, capture_output=True, check=False)
-        if (val.returncode != 0):
-            print("Execution error:")
-            print(val)
-
-    print("Run finished\n")
 
 
 folder = Path("executables/")
@@ -136,10 +81,7 @@ print("Found algorithms: ", [
 
 for subfolder in folder.iterdir():
 
-    # select specific folder:
-    # , "copy_if-nocopies", "copy_if-allcopies"]:
-    if subfolder.stem not in ["transform"]:
-        continue
+    # if subfolder.stem not in ["transform"]:
+    #     continue
 
-    # vtune_run_folder(subfolder, "threading", 0)
     benchmark_folder(subfolder)
