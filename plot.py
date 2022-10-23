@@ -17,10 +17,10 @@ def plot_scatter(csv_path: Path):
 
     # select what to keep
     raw_data = raw_data[raw_data["alg_name"].str.contains(
-        "copy_if/")]
+        "transform/")]
 
     raw_data = raw_data[raw_data["alg_name"].str.contains(
-        "hpx_par|my_hpx_par|std_seq")]
+        "hpx_par_scs|hpx_par_sched-exec|hpx_par_fork-join|std_seq")]
 
     # remove prefix naming
     raw_data["alg_name"] = raw_data["alg_name"].str.removeprefix(
@@ -56,10 +56,13 @@ def plot_scatter(csv_path: Path):
 
     # select chunk sizes to be plotted
     data.drop(
-        data[~((data["alg_name"] == ("copy_if/my_hpx_par"))
-               & (data["chunks"] == 160))
-             & ~((data["alg_name"] == ("copy_if/hpx_par"))
+        data[~((data["alg_name"] == ("transform/hpx_par_sched-exec"))
+               & (data["chunks"] == 40))
+             & ~((data["alg_name"] == ("transform/hpx_par_sched-exec"))
                  & (data["chunks"] == 160))
+             & ~((data["alg_name"] == ("transform/hpx_par_sched-exec"))
+                 & (data["chunks"] == 320))
+
              #  & ~((data["alg_name"] == ("remove/my_hpx_par_scs"))
              #      & (data["chunks"] == 320))
              #  & ~((data["alg_name"] == ("remove/hpx_par_scs"))
@@ -99,9 +102,9 @@ def plot_scatter(csv_path: Path):
     # ax.set_yscale("log")
     ax.set_xscale("log")
     # ax.set_ylim(bottom=0)
-    ax.set_ylim([0, 6])
+    # ax.set_ylim([0, 6])
 
-    alg_name = "copy_if"
+    alg_name = "transform"
     ax.set_title(
         "Speedup of '" + alg_name + "'")
 

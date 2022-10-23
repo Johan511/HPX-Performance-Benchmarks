@@ -12,7 +12,8 @@ import subprocess
 def benchmark_folder(exec_folder_path: Path):
     for executable in exec_folder_path.iterdir():
         # __runs only hpx_par__
-        if executable.stem not in ["std_seq"]:
+        if executable.stem not in ["hpx_par_scs", "hpx_par_fork-join", "hpx_par_sched-exec"]:
+            # if executable.stem not in ["std_seq"]:
             continue
         benchmark_chunks(executable)
 
@@ -30,8 +31,8 @@ def benchmark_chunks(executable_path: Path):
         math.log10(n_min), math.log10(n_max), n_datapoints)]
 
     cores = multiprocessing.cpu_count()
-    # chunks_list = [1, 2, 4, 10, 20, 40, 80, 160, 320]
-    chunks_list = [1]
+    chunks_list = [1, 2, 4, 10, 20, 40, 80, 160, 320]
+    # chunks_list = [1]
     # threads_list = [1, 2, 4, 8, 10, 20, 30, 40]
     # threads_list = [0]
 
@@ -137,7 +138,7 @@ for subfolder in folder.iterdir():
 
     # select specific folder:
     # , "copy_if-nocopies", "copy_if-allcopies"]:
-    if subfolder.stem not in ["copy_if"]:
+    if subfolder.stem not in ["transform"]:
         continue
 
     # vtune_run_folder(subfolder, "threading", 0)

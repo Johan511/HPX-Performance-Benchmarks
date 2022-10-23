@@ -4,11 +4,7 @@
     {
       "name": "rostam-base",
       "hidden": true,
-      "generator": "Ninja",
-      "cacheVariables": {
-        "AMPLIFIER_ROOT": "/opt/intel/oneapi/vtune/latest/",
-        "CMAKE_CXX_FLAGS": "-ltbb" //link tbb on GCC, needed for parallel stl
-      }
+      "generator": "Ninja"
     },
     {
       "name": "rostam",
@@ -26,8 +22,7 @@
       "cacheVariables": {
         "CMAKE_C_COMPILER": "cl.exe",
         "CMAKE_CXX_COMPILER": "cl.exe",
-        "BOOST_ROOT": "C:/dev/libraries/boost_1_79_0/",
-        "AMPLIFIER_ROOT": "C:/Program Files (x86)/Intel/oneAPI/vtune/latest/"
+        "BOOST_ROOT": "C:/dev/libraries/boost_1_79_0/"
       },
       "condition": {
         "type": "equals",

@@ -1,29 +1,42 @@
-﻿# set(vtune_dir "/opt/intel/oneapi/vtune/latest/sdk")
-
-function(add_exe target)
-    get_filename_component(alg_name ${CMAKE_CURRENT_SOURCE_DIR} NAME)
-    add_hpx_executable(
-        ${alg_name}_${target} 
-        SOURCES ${target}.cpp
-        HEADERS ../utilities.hpp #${vtune_dir}/include
-        # DEPENDENCIES ${vtune_dir}/lib64/libittnotify.a
-        INSTALL_SUFFIX ${alg_name}/
-    )
-    
-    set_target_properties(${alg_name}_${target} PROPERTIES OUTPUT_NAME ${target})
-endfunction()
-
-
- set(subdirs
-    "copy_if"
-    "copy_if-heavy"
-    "remove"
-    "unique"
-    "copy"
-    "transform"
+﻿set(algorithms
+"copy_if-heavy"
+"copy_if"
+"copy"
+"count"
+"find"
+"remove"
+"reverse"
+"sort"
+"transform"
+"transform-heavy"
 )
 
-foreach(subdir ${subdirs})
-    message("Adding subdir ${subdir}")
-    add_subdirectory(${subdir})
-endforeach(subdir)
+#fork_join executor only works with algorithms that use bulk_x_execute
+set(fork_join_algorithms
+"copy"
+"find"
+"reverse"
+"transform"
+"transform-heavy"
+)
+
+
+
+set(call_defines
+STD_SEQ
+HPX_PAR_SCS
+HPX_PAR_SCHED_EXEC
+)
+
+
+foreach(algorithm ${algorithms})
+    foreach(call_define ${call_defines})
+    add_exe(${algorithm} ${call_define})
+    endforeach(call_define)
+endforeach(algorithm)
+
+foreach(algorithm ${fork_join_algorithms})
+    add_exe(${algorithm} HPX_PAR_FORK_JOIN)
+endforeach(algorithm)
+
+
