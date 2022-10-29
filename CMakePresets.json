@@ -20,9 +20,11 @@
       "hidden": true,
       "generator": "Ninja",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "cl.exe",
-        "CMAKE_CXX_COMPILER": "cl.exe",
-        "BOOST_ROOT": "C:/dev/libraries/boost_1_79_0/"
+        "CMAKE_C_COMPILER": "clang-cl.exe",
+        "CMAKE_CXX_COMPILER": "clang-cl.exe",
+        "HPX_DIR": "C:/dev/HPX/latest/install_debug",
+        "BOOST_ROOT": "C:/dev/libraries/boost_1_79_0/",
+        "AMPLIFIER_ROOT": "C:/Program Files (x86)/Intel/oneAPI/vtune/latest/"
       },
       "condition": {
         "type": "equals",
@@ -41,7 +43,7 @@
       "inherits": "windows-base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "HPX_DIR": "C:/dev/HPX/install_debug"
+        "HPX_DIR": "C:/dev/HPX/latest/install_debug"
       }
     },
     {

@@ -3,4 +3,8 @@ install
 plots
 results.csv
 vtune_results
+/install_debug
+/build_debug
+/.vs
+vtune_results
 executables

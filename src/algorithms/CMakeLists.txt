@@ -10,6 +10,7 @@
 "transform"
 "transform-heavy"
 )
+set(vtune_dir "C:/Program Files (x86)/Intel/oneAPI/vtune/latest/sdk")
 
 #fork_join executor only works with algorithms that use bulk_x_execute
 set(fork_join_algorithms
