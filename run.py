@@ -74,7 +74,7 @@ def result_to_csv(alg_name: str, results: list[list[str, str, int, int, float]])
               header=(not os.path.exists(filename)))
 
 
-folder = Path("executables/")
+folder = Path("install/")
 
 print("Found algorithms: ", [
     item.with_suffix("").name for item in folder.iterdir()])
