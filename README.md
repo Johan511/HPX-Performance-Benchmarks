@@ -6,9 +6,6 @@ Made as part of [my 2022 GSoC project](https://pansysk75.github.io/blog/summer-o
 ## Requirements:
 
 * Functional HPX installation 
->Note: If you wish to use Intel VTune, build in RelWithDebInfo mode, set HPX_WITH_ITTNOTIFY=ON
->and define the appropriate AMPLIFIER_ROOT directory
-
 * Python & corresponding python modules
 
 
