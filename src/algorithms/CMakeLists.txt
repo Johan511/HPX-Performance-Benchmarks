@@ -1,11 +1,16 @@
 ﻿set(algorithms
+"all_of"
 "copy_if-heavy"
 "copy_if"
 "copy"
 "count"
 "find"
+"find_if"
+"for_each"
+"for_each-heavy"
 "remove"
 "reverse"
+"search"
 "sort"
 "transform"
 "transform-heavy"
@@ -22,21 +27,28 @@ set(fork_join_algorithms
 
 
 
-set(call_defines
-STD_SEQ
-HPX_PAR_SCS
-HPX_PAR_SCHED_EXEC
-)
-
+# Build the standard executables
 
 foreach(algorithm ${algorithms})
-    foreach(call_define ${call_defines})
-    add_exe(${algorithm} ${call_define})
-    endforeach(call_define)
+    add_exe(${algorithm} STD_SEQ)
+    add_exe(${algorithm} HPX_PAR_SCS)
 endforeach(algorithm)
 
-foreach(algorithm ${fork_join_algorithms})
-    add_exe(${algorithm} HPX_PAR_FORK_JOIN)
-endforeach(algorithm)
+
+# Build with the scheduler / fork-join executors
+
+if(BUILD_SCHED_EXEC)
+    foreach(algorithm ${algorithms})
+        add_exe(${algorithm} HPX_PAR_SCHED_EXEC)
+    endforeach(algorithm)
+endif()
+
+
+if(BUILD_FORK_JOIN_EXEC)
+    foreach(algorithm ${fork_join_algorithms})
+        add_exe(${algorithm} HPX_PAR_SCHED_EXEC)
+    endforeach(algorithm)
+endif()
+
 
 

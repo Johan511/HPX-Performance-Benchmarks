@@ -12,20 +12,16 @@ double test(std::vector<std::string> args)
 {
     int vector_size = std::stoi(args[0]);
     BENCH_INIT(args);
-    // In a uniform random distribution vector of size n (k is an integer):
-    // P(any element = k) = 1 - P(all elements != k)
-    // = 1 - q^n
-    // where q = P(single element != k)
-    // For a uniform distr in range [1, x], q = 1 - 1/x
-    // Thus, we select x so that
-    // P(find) = P(any element = k) = 1-q^n = whatever we need
 
-    auto vec1 = gen.get_ints(vector_size, 0, vector_size);
-    // auto vec1 = gen.get_ints(vector_size, 0, 4);
-    // std::vector<int> vec1(vector_size, 0);
+    // by trial and error, the heuristic below seems to give ~70% of actually finding
+    // the succession {1, 1} in vec1
+    auto vec1 = gen.get_ints(vector_size, 0, std::max(1.0, std::sqrt(vector_size)));
+    // auto vec1 = gen.get_ints(vector_size, 0, std::max(1.0, std::sqrt(vector_size) / 100.0));
+
+    std::vector<int> vec2{0, 0};
 
     timer.start();
-    auto result = BENCH_CALL(find, vec1.begin(), vec1.end(), 0);
+    auto result = BENCH_CALL(search, vec1.begin(), vec1.end(), vec2.begin(), vec2.end());
     timer.stop();
 
     // use result otherwise compiler will optimize it away:

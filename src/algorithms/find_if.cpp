@@ -21,11 +21,14 @@ double test(std::vector<std::string> args)
     // P(find) = P(any element = k) = 1-q^n = whatever we need
 
     auto vec1 = gen.get_ints(vector_size, 0, vector_size);
+    auto pred = [vector_size](auto num)
+    { return ((int)std::pow(num, 1.2) % (vector_size)) == 0; };
+
     // auto vec1 = gen.get_ints(vector_size, 0, 4);
     // std::vector<int> vec1(vector_size, 0);
 
     timer.start();
-    auto result = BENCH_CALL(find, vec1.begin(), vec1.end(), 0);
+    auto result = BENCH_CALL(find_if, vec1.begin(), vec1.end(), pred);
     timer.stop();
 
     // use result otherwise compiler will optimize it away:
@@ -36,7 +39,8 @@ double test(std::vector<std::string> args)
 
     // if (result != vec1.end())
     // {
-    //     std::cout << "YES ";
+    //     auto distance = std::distance(vec1.begin(), result);
+    //     std::cout << "Found in chunck: " << distance / (vector_size / 80) << "\n";
     // }
 
     return timer.get();

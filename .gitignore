@@ -1,6 +1,4 @@
 build
 install
 plots
-results.csv
-vtune_results
-executables
+*.csv

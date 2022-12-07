@@ -6,83 +6,55 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 
-def plot_scatter(csv_path: Path):
-    raw_data = pd.read_csv(csv_path)
-
-    # # select range of data
-    # raw_data.drop(raw_data[(raw_data["n"] < 10**2)
-    #               | (raw_data["n"] > 10**7)].index, inplace=True)
-
-    groups = raw_data.groupby("alg_name")
-    for name, df in groups:
-        print("Plotting ", df["alg_name"].iloc[0])
-        plot_single_alg(df)
-
-
 def plot_single_alg(data: pd.DataFrame):
     alg_name = data["alg_name"].iloc[0]
+    print(data)
+
     # make speedup column
-    seq_data = data[data["impl"] == "STD_SEQ"]
-    # print(seq_data)
+    reference_data = data[data["impl"] == "STD_SEQ"]
+    reference_avg = reference_data.groupby("n")["time"].mean()
 
-    seq_mean = seq_data.groupby("n").mean()["time"].rename("seq_avg")
-    print(seq_mean)
-    data = data.merge(seq_mean, on="n")
-    data["speedup"] = data["seq_avg"]/data["time"]
+    data_avg = data.groupby(["impl", "n"], as_index=False)["time"].mean()
 
-    # select chunk sizes to be plotted
-    data.drop(
-        data[~(
-            (data["impl"].isin(["HPX_PAR_SCS", "HPX_PAR_SCHED_EXEC"]))
-            & (data["chunks"].isin([160])))
+    data_avg = data_avg.merge(reference_avg.rename("ref_time"), on="n")
+    # print(reference_means)
+    data_avg["speedup"] = data_avg["ref_time"]/data_avg["time"]
 
-            #  & ~((data["alg_name"] == ("remove/my_hpx_par_scs"))
-            #      & (data["chunks"] == 320))
-            #  & ~((data["alg_name"] == ("remove/hpx_par_scs"))
-            #      & (data["chunks"] == 320))
-            #  & ~((data["alg_name"].str.contains("/my_hpx_par_scs"))
-            #      & (data["chunks"] == 40))
-            #  & ~((data["alg_name"].str.contains("/std_seq")))
-        ].index, inplace=True)
+    # print(data_avg.to_string())
 
-    # data = data.sort_values(by=["alg_name", "n"], ascending=[False, False])
     fig, ax = plt.subplots(figsize=(14, 8))
 
-    # palette = sns.diverging_palette(
-    #     250, 30, l=65, center="dark", as_cmap=True)
+    sns.lineplot(x='n', y='speedup', hue='impl', data=data_avg, ax=ax)
 
-    sns.scatterplot(x="n", y="speedup", data=data,
-                    hue=data[["impl", "chunks"]].apply(tuple, axis=1),
-                    # hue="chunks",
-                    legend="full",
-                    # palette=palette,
+    sns.scatterplot(x="n", y="speedup", data=data_avg,
+                    hue="impl",
+                    legend=None,
                     alpha=0.8,
                     s=4,
                     ax=ax)
-
-    sns.lineplot(x="n", y="speedup", data=data,
-                 hue=data[["impl", "chunks"]].apply(tuple, axis=1),
-                 legend=None,
-                 #  palette=palette,
-                 ci=None,
-                 ax=ax)
-
-    sns.lineplot(x=[data["n"].min(), data["n"].max()],
-                 y=[1, 1], ax=ax, color="black", linestyle="dashed")
 
     ax.set_ylabel("speedup (relative to seq)")
 
     # ax.set_yscale("log")
     ax.set_xscale("log")
-    # ax.set_ylim(bottom=0)
-    # ax.set_ylim([0, 6])
+    # ax.set_xlim([10**4, 10**8])
+    ax.set_ylim([0, data_avg["speedup"].max()])
+    # ax.set_ylim([0, 5])
 
     ax.set_title(
-        "Speedup of '" + alg_name + "'")
+        "Speedup of '" + alg_name)
 
-    savepath = Path("plots/" + alg_name)
+    savepath = Path("plots")
     savepath.mkdir(parents=True, exist_ok=True)
-    plt.savefig(savepath.as_posix() + "/" + alg_name + ".png", dpi=140)
+    filename = savepath.as_posix() + "/" + alg_name + ".png"
+    plt.savefig(filename, dpi=140)
 
 
-plot_scatter(Path("results.csv"))
+data = pd.read_csv("results.csv")
+
+groups = data.groupby("alg_name")
+for name, df in groups:
+    alg_name = df["alg_name"].iloc[0]
+
+    print("Plotting ", alg_name)
+    plot_single_alg(df)
