@@ -1,6 +1,7 @@
 
 import math
 import multiprocessing
+import itertools
 import os
 from pathlib import Path
 import pandas as pd
@@ -9,12 +10,12 @@ import numpy as np
 import subprocess
 
 
-def benchmark_folder(exec_folder_path: Path):
+def run_benchmark_folder(exec_folder_path: Path):
     for executable in exec_folder_path.iterdir():
-        benchmark_chunks(executable)
+        run_benchmark(executable)
 
 
-def benchmark_chunks(executable_path: Path):
+def run_benchmark(executable_path: Path):
     alg_name = executable_path.as_posix().split("/")[1]
     impl = executable_path.as_posix().split("/")[2]
 
@@ -24,58 +25,42 @@ def benchmark_chunks(executable_path: Path):
     # be the vector sizes for which the algorithm will be benchmarked.
     n_datapoints = 4
     n_min, n_max = [10**3, 10**7]
-
     n_list = [int(n) for n in np.logspace(
         math.log10(n_min), math.log10(n_max), n_datapoints)]
 
-    # cores = multiprocessing.cpu_count()
-    if impl == "STD_SEQ":
-        chunks_list = [1]
-    else:
-        # This may be used to manually select the number of chunks for
-        # parallel algorithms. Value of 0 means HPX will use its
-        # default heuristic.
-        chunks_list = [
-            # 1, 4, 10, 20, 40,
-            # 80,
-            0,
-            # 320,
-            # 640
-        ]
+    # This may be used to manually select the number of chunks for
+    # parallel algorithms. Value of 0 means HPX will use its
+    # default heuristic.
+    n_chunks_list = [1] if (impl=="STD_SEQ") else [0]
 
-    for n in pb.progressbar(n_list):
-        results = list()
 
-        for n_chunks in chunks_list:
-            iterations = 10
+    for combination in pb.progressbar(itertools.product(n_list, n_chunks_list)):
+        n, n_chunks = combination
+        iterations = 10
 
-            if (n_chunks == 0):
-                chunk_size = 0
-            else:
-                chunk_size = math.ceil(n / n_chunks)
+        chunk_size = 0 if (n_chunks==0) else math.ceil(n / n_chunks)
 
-            command = [executable_path, str(iterations),
-                       str(n), str(chunk_size),
-                       #    "--hpx:threads=20",
-                       #   "--hpx:bind=numa-balanced"
-                       ]
+        command = [executable_path, str(iterations),
+                    str(n), str(chunk_size),
+                    #    "--hpx:threads=20",
+                    #   "--hpx:bind=numa-balanced"
+                    ]
 
-            # Run the algorithm. It will return a collection of floats, each float
-            # representing elapsed time(ns) for each algorithm invocation.
-            ret = subprocess.run(command, capture_output=True, check=False)
+        # Run the algorithm. It will return a collection of floats, each float
+        # representing elapsed time(ns) for each algorithm invocation.
+        ret = subprocess.run(command, capture_output=True, check=False)
 
-            if (ret.returncode != 0):
-                print("\nExecution error:\n")
-                print(ret)
+        if (ret.returncode != 0):
+            print("\nExecution error:\n")
+            print(ret)
 
-            # convert output to list of tuples(alg_name, vector_size, time in ms)
-            datapoints = [[alg_name, impl, n, chunk_size,
-                           float(dt)/(10**6), n_chunks]
-                          for dt in ret.stdout.splitlines()]
+        # convert output to list of tuples(alg_name, vector_size, time in ms)
+        datapoints = [[alg_name, impl, n, chunk_size,
+                        float(dt)/(10**6), n_chunks]
+                        for dt in ret.stdout.splitlines()]
 
-            # print("n = ", n, " :  ", datapoints, " ms")
-            results.extend(datapoints)
-        result_to_csv(alg_name, results)
+        # print("n = ", n, " :  ", datapoints, " ms")
+        result_to_csv(alg_name, datapoints)
     print("Benchmark finished\n")
 
 
@@ -95,4 +80,4 @@ print("Found algorithms: ", [
     item.with_suffix("").name for item in folder.iterdir()])
 
 for subfolder in folder.iterdir():
-    benchmark_folder(subfolder)
+    run_benchmark_folder(subfolder)
