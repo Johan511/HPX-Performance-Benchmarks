@@ -23,7 +23,7 @@ double test(std::vector<std::string> args)
 	int k = gen.get_ints(1, 0, vector_size - 1)[0];
 
 	timer.start();
-	BENCH_CALL(rotate, vec1.begin(), vec1.begin() + k, vec2.begin());
+	BENCH_CALL(rotate, vec1.begin(), vec1.begin() + k, vec1.end());
 	timer.stop();
 
 	// use result otherwise compiler will optimize it away:

@@ -20,7 +20,7 @@ double test(std::vector<std::string> args)
 	decltype(vec1) vec2(vec1.size());
 
 	timer.start();
-	BENCH_CALL(partition, vec1.begin(), vec1.end(), vec2.begin(), pred);
+	BENCH_CALL(partition, vec1.begin(), vec1.end(), pred);
 	timer.stop();
 
 	// use result otherwise compiler will optimize it away:
