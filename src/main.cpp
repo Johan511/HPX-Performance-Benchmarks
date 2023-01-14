@@ -33,6 +33,10 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	if (cl_arguments.size() < 3){
+		cl_arguments.push_back("0");
+	}
+
 	std::vector<double> time_vec = test_n(cl_arguments);
 
 	// Output result

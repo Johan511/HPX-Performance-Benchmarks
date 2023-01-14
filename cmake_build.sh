@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Pass all arguments to the cmake command as additional -D flags
-HPX_DIR=~/HPX/install/ cmake -G Ninja -S . -B build/ -D "CMAKE_INSTALL_PREFIX=install/" -D "CMAKE_BUILD_TYPE=Release" "$@"
+HPX_DIR=~/HPX/install/ cmake -G Ninja -S src/ -B build/ -D "CMAKE_INSTALL_PREFIX=install/" -D "CMAKE_BUILD_TYPE=Release" "$@"
 
 # Run the cmake --build command and store the exit code
 cmake --build ./build/
