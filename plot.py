@@ -11,21 +11,20 @@ def plot_single_alg(data: pd.DataFrame):
     print(data)
 
     # make speedup column
-    reference_data = data[data["impl"] == "STD_SEQ"].copy()
+    reference_data = data[data["n_threads"] == 1].copy()
     reference_data["time_inv"] = reference_data["time"].transform(
         lambda x: 1/x).copy()
     reference_avg = 1 / (reference_data.groupby("n")["time_inv"].mean())
     data = data.merge(reference_avg.rename("ref_avg"), on="n")
     data["speedup"] = data["ref_avg"]/data["time"]
 
-    # print(data_avg.to_string())
-
+    print(data)
     fig, ax = plt.subplots(figsize=(14, 8))
 
-    sns.lineplot(x='n', y='speedup', hue='impl', data=data, ax=ax, errorbar=None)
+    sns.lineplot(x='n', y='speedup', hue='n_threads', data=data, ax=ax, errorbar=None)
 
     sns.scatterplot(x="n", y="speedup", data=data,
-                    hue="impl",
+                    hue="n_threads",
                     legend=None,
                     alpha=0.8,
                     s=4,
@@ -36,7 +35,7 @@ def plot_single_alg(data: pd.DataFrame):
     # ax.set_yscale("log")
     ax.set_xscale("log")
     # ax.set_xlim([10**4, 10**8])
-    ax.set_ylim([0, data_avg["speedup"].max()])
+    ax.set_ylim([0, data["speedup"].max()])
 
     ax.set_title("Speedup of '" + alg_name)
 

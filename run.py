@@ -11,36 +11,28 @@ import subprocess
 
 
 def run_benchmark(executable_path: Path):
-    alg_name = executable_path.as_posix().split("/")[1]
-    impl = executable_path.as_posix().split("/")[2]
 
-    print("\nStarting benchmark: (" + alg_name + ", " + impl + "):")
+    alg_name = executable_path.split("/")[-1]
+    print("\nStarting benchmark: (" + alg_name + "):")
 
     # The sizes of the data the algorithm will process (2^5, 2^6 .... 2^30)
-    n_list = [int(2**i) for i in range(5,28)]
-
-    # This list may be used to manually select the number of chunks for
-    # parallel algorithms. Value of 0 means HPX will use its
-    # default heuristic.
-    n_chunks_list = [1] if (impl=="STD_SEQ") else [0]
+    n_list = [int(2**i) for i in range(5,10)]
 
     # This list is for selecting the number of threads to be tested
     # Value of 0 means all threads
-    n_threads_list = [0]
+    n_threads_list = [1,4,10]
 
     # Will be passed as an argument to the executable
     iterations = 10
 
-    for combination in pb.progressbar(itertools.product(n_list, n_chunks_list, n_threads_list)):
-        n, n_chunks, n_threads = combination
-
-        chunk_size = 0 if (n_chunks==0) else math.ceil(n / n_chunks)
+    for combination in pb.progressbar(itertools.product(n_list, n_threads_list)):
+        n, n_threads = combination
 
         command = [executable_path, str(iterations),
                     str(n)
                     #   "--hpx:bind=numa-balanced"
                     ]
-        command += [] if (n_chunks == 0) else [str(chunk_size)]
+
         command += [] if (n_threads == 0) else ["--hpx:threads="+str(n_threads)]
 
         # Run the algorithm. It will return a collection of floats, each float
@@ -52,7 +44,7 @@ def run_benchmark(executable_path: Path):
             print(ret)
 
         # For every run, attach all relevant data and add in list
-        datapoints = [[alg_name, impl, n, n_threads, n_chunks,
+        datapoints = [[alg_name, n, n_threads,
                         float(dt)/(10**6)] for dt in ret.stdout.splitlines()]
 
         result_to_csv(alg_name, datapoints)
@@ -61,7 +53,7 @@ def run_benchmark(executable_path: Path):
 
 def result_to_csv(alg_name: str, results: list[list[str, str, int, int, float]]):
     df = pd.DataFrame(results, columns=[
-                      "alg_name", "impl", "n", "n_threads", "n_chunks", "time"])
+                      "alg_name", "n", "n_threads", "time"])
     # print(df)
 
     filename = 'results.csv'
@@ -70,11 +62,5 @@ def result_to_csv(alg_name: str, results: list[list[str, str, int, int, float]])
 
 
 
-folder = Path("install/")
-
-print("Found algorithms: ", [
-    item.with_suffix("").name for item in folder.iterdir()])
-
-for subfolder in folder.iterdir():
-    for executable in subfolder.iterdir():
-        run_benchmark(executable)
+executable = "install/bin/rotate"
+run_benchmark(executable)
