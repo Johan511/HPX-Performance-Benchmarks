@@ -6,8 +6,14 @@ project ("HPX_Benchmark")
 find_package(HPX REQUIRED)
 
 add_hpx_executable(
-    rotate
-    SOURCES rotate.cpp
+    scale
+    SOURCES scale.cpp
+    HEADERS utilities.hpp
+)
+
+add_hpx_executable(
+    add
+    SOURCES add.cpp
     HEADERS utilities.hpp
 )
 

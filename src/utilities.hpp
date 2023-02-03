@@ -44,10 +44,10 @@ namespace utilities
 		}
 	};
 
-	class timer
-	{
 
+	class my_timer_t{
 	private:
+		std::chrono::high_resolution_clock::time_point process_start = std::chrono::high_resolution_clock::now();
 		std::chrono::high_resolution_clock::time_point t1;
 		std::chrono::high_resolution_clock::time_point t2;
 
@@ -55,6 +55,7 @@ namespace utilities
 		void start() { t1 = std::chrono::high_resolution_clock::now(); }
 		void stop() { t2 = std::chrono::high_resolution_clock::now(); }
 		double get() { return (double)std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count(); }
-	};
+		double now() { return (double)std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - process_start).count();} //
+	}timer;
 
 }

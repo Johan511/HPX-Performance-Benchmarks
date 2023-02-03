@@ -16,17 +16,20 @@ def run_benchmark(executable_path: Path):
     print("\nStarting benchmark: (" + alg_name + "):")
 
     # The sizes of the data the algorithm will process (2^5, 2^6 .... 2^30)
-    n_list = [int(2**i) for i in range(5,10)]
+    n_list = [2**20]
 
     # This list is for selecting the number of threads to be tested
     # Value of 0 means all threads
-    n_threads_list = [1,4,10]
+    n_threads_list = [0]
 
     # Will be passed as an argument to the executable
-    iterations = 10
+    iterations = 5000
 
-    for combination in pb.progressbar(itertools.product(n_list, n_threads_list)):
-        n, n_threads = combination
+    # How many times to launch the executable
+    n_extern_iter = 10
+
+    for combination in pb.progressbar(itertools.product(n_list, n_threads_list, range(n_extern_iter))):
+        n, n_threads, extern_iter = combination
 
         command = [executable_path, str(iterations),
                     str(n)
@@ -44,16 +47,16 @@ def run_benchmark(executable_path: Path):
             print(ret)
 
         # For every run, attach all relevant data and add in list
-        datapoints = [[alg_name, n, n_threads,
+        datapoints = [[alg_name, n, n_threads, extern_iter,
                         float(dt)/(10**6)] for dt in ret.stdout.splitlines()]
 
         result_to_csv(alg_name, datapoints)
     print("Benchmark finished\n")
 
 
-def result_to_csv(alg_name: str, results: list[list[str, str, int, int, float]]):
+def result_to_csv(alg_name: str, results: list[list[str, str, int, int, int, float]]):
     df = pd.DataFrame(results, columns=[
-                      "alg_name", "n", "n_threads", "time"])
+                      "alg_name", "n", "n_threads", "extern_iter", "time"])
     # print(df)
 
     filename = 'results.csv'
@@ -62,5 +65,6 @@ def result_to_csv(alg_name: str, results: list[list[str, str, int, int, float]])
 
 
 
-executable = "install/bin/rotate"
-run_benchmark(executable)
+executables_folder = "install/bin/"
+for executable in Path(executables_folder).iterdir():
+    run_benchmark(str(executable))
