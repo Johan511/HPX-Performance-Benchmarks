@@ -8,6 +8,7 @@ import pandas as pd
 import progressbar as pb
 import numpy as np
 import subprocess
+import json
 
 
 def run_benchmark(executable_path: Path):
@@ -23,7 +24,7 @@ def run_benchmark(executable_path: Path):
     n_threads_list = [0]
 
     # Will be passed as an argument to the executable
-    iterations = 5000
+    iterations = 500
 
     # How many times to launch the executable
     n_extern_iter = 10
@@ -38,17 +39,19 @@ def run_benchmark(executable_path: Path):
 
         command += [] if (n_threads == 0) else ["--hpx:threads="+str(n_threads)]
 
-        # Run the algorithm. It will return a collection of floats, each float
-        # representing elapsed time(ns) for each algorithm invocation.
+        # Run the algorithm.
         ret = subprocess.run(command, capture_output=True, check=False)
 
         if (ret.returncode != 0):
             print("\nExecution error:\n")
             print(ret)
 
+        # Parse output. Output is a string in json format (array of dicts)
+        data = json.loads(ret.stdout)
+
         # For every run, attach all relevant data and add in list
         datapoints = [[alg_name, n, n_threads, extern_iter,
-                        float(dt)/(10**6)] for dt in ret.stdout.splitlines()]
+                       d["t"]/(10**6),  d["dt"]/(10**6)] for d in data ]
 
         result_to_csv(alg_name, datapoints)
     print("Benchmark finished\n")
@@ -56,7 +59,7 @@ def run_benchmark(executable_path: Path):
 
 def result_to_csv(alg_name: str, results: list[list[str, str, int, int, int, float]]):
     df = pd.DataFrame(results, columns=[
-                      "alg_name", "n", "n_threads", "extern_iter", "time"])
+                      "alg_name", "n", "n_threads", "extern_iter", "begin_time", "time"])
     # print(df)
 
     filename = 'results.csv'

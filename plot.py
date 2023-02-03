@@ -7,21 +7,28 @@ import scipy
 import matplotlib.pyplot as plt
 
 def plot_sequence(data: pd.DataFrame):
+    sns.set_style("whitegrid")
+
     alg_name = data["alg_name"].iloc[0]
 
-    data = data[(data["extern_iter"].isin([0]))]
-    data = data.reset_index()
+    data["Total time elapsed (s)"] = data["begin_time"]/1000
+    data["Algorithm execution time (ms)"] = data["time"]
 
-    fig, ax = plt.subplots(figsize=(40, 10))
+    data = data[(data["extern_iter"].isin([1]))]
+    # data = data.reset_index()
 
-    ax = sns.scatterplot(data=data, x="index", y="time")
+    fig, ax = plt.subplots(figsize=(20, 5))
+
+    sns.scatterplot(data=data, x="Total time elapsed (s)", y="Algorithm execution time (ms)", s=6, ax=ax)
+    # sns.lineplot(data=data, x="Total time elapsed (s)", y="Algorithm execution time (ms)", ax=ax)
 
 
     # data = data[(data["time"] < data["time"].quantile(0.995))
     #  & (data["time"] > data["time"].quantile(0.005))
     #  ]
 
-    ax.set(ylim=(0, data["time"].quantile(0.99)))
+    ax.set(ylim=(data["time"].min(), data["time"].quantile(0.99)))
+    ax.xaxis.grid(True, which='minor')
 
     savepath = Path("plots")
     savepath.mkdir(parents=True, exist_ok=True)
