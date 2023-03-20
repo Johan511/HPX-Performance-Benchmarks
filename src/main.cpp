@@ -5,19 +5,22 @@
 #include <hpx/hpx_main.hpp>
 #include <vector>
 #include <string>
+#include "./tb.hpp"
 
-std::vector<double> test_n(std::vector<std::string> cl_arguments)
+class MakeHeapAlgorithmTest : AlgorithmTest
 {
-	int iterations = std::stoi(cl_arguments[0]);
-	cl_arguments.erase(cl_arguments.begin()); // pop first element
-	std::vector<double> time_vec;
-	for (int i = 0; i < iterations; i++)
+public:
+	virtual ~MakeHeapAlgorithmTest() = default;
+	static inline void f(std::vector<double> &v)
 	{
-		double dt = test(cl_arguments);
-		time_vec.push_back(dt);
+		hpx::make_heap(hpx::execution::par, v.begin(), v.end());
 	}
-	return time_vec;
-}
+
+	double operator()(int n)
+	{
+		return bench(f, n);
+	}
+};
 
 int main(int argc, char *argv[])
 {
@@ -33,18 +36,11 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	if (cl_arguments.size() < 3){
+	if (cl_arguments.size() < 3)
+	{
 		cl_arguments.push_back("0");
 	}
 
-	std::vector<double> time_vec = test_n(cl_arguments);
-
-	// Output result
-
-	for (auto datapoint : time_vec)
-	{
-		std::cout << datapoint << "\n";
-	}
-
+	TestBench<MakeHeapAlgorithmTest>(100000000);
 	return 0;
 }
