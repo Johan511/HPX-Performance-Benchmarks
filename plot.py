@@ -36,7 +36,7 @@ def plot_single_alg(data: pd.DataFrame):
     # ax.set_yscale("log")
     ax.set_xscale("log")
     # ax.set_xlim([10**4, 10**8])
-    ax.set_ylim([0, data_avg["speedup"].max()])
+    # ax.set_ylim([0, data_avg["speedup"].max()])
 
     ax.set_title("Speedup of '" + alg_name)
 

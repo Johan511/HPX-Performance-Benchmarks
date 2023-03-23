@@ -1,11 +1,11 @@
 
 import math
 import multiprocessing
-import itertools
+from itertools import product
 import os
 from pathlib import Path
 import pandas as pd
-import progressbar as pb
+from progressbar import progressbar
 import numpy as np
 import subprocess
 
@@ -19,19 +19,10 @@ def run_benchmark(executable_path: Path):
     # The sizes of the data the algorithm will process (2^5, 2^6 .... 2^30)
     n_list = [int(2**i) for i in range(5,28)]
 
-    # This list may be used to manually select the number of chunks for
-    # parallel algorithms. Value of 0 means HPX will use its
-    # default heuristic.
-    n_chunks_list = [1] if (impl=="STD_SEQ") else [0]
-
-    # This list is for selecting the number of threads to be tested
-    # Value of 0 means all threads
-    n_threads_list = [0]
-
     # Will be passed as an argument to the executable
     iterations = 10
 
-    for combination in pb.progressbar(itertools.product(n_list, n_chunks_list, n_threads_list)):
+    for combination in product(n_list, n_chunks_list, n_threads_list):
         n, n_chunks, n_threads = combination
 
         chunk_size = 0 if (n_chunks==0) else math.ceil(n / n_chunks)

@@ -7,10 +7,25 @@
 #include <string>
 #include "./tb.hpp"
 
-class MakeHeapAlgorithmTest : AlgorithmTest
+class MakeHeapAlgorithmParUnseqTest : AlgorithmTest
 {
 public:
-	virtual ~MakeHeapAlgorithmTest() = default;
+	virtual ~MakeHeapAlgorithmParUnseqTest() = default;
+	static inline void f(std::vector<double> &v)
+	{
+		hpx::make_heap(hpx::execution::par_unseq, v.begin(), v.end());
+	}
+
+	double operator()(int n)
+	{
+		return bench(f, n);
+	}
+};
+
+class MakeHeapAlgorithmParTest : AlgorithmTest
+{
+public:
+	virtual ~MakeHeapAlgorithmParTest() = default;
 	static inline void f(std::vector<double> &v)
 	{
 		hpx::make_heap(hpx::execution::par, v.begin(), v.end());
@@ -38,9 +53,15 @@ int main(int argc, char *argv[])
 
 	if (cl_arguments.size() < 3)
 	{
-		cl_arguments.push_back("0");
+		cl_arguments.push_back("0");	
 	}
 
-	TestBench<MakeHeapAlgorithmTest>(100000000);
+	int len = stoi(cl_arguments[0]);
+	int itr = stoi(cl_arguments[1]);
+
+	std::cout << len << " " << itr << std::endl;
+	// TestBench<MakeHeapAlgorithmParUnseqTest>(len, itr);
+	TestBench<MakeHeapAlgorithmParTest>(len, itr);
+
 	return 0;
 }
